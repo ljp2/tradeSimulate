@@ -9,8 +9,6 @@ from multiprocessing import Manager
 import sys
 from collections import namedtuple
 
-df = pd.read_csv('/Users/ljp2/trade/Data/bars1/20220202.csv')
-
 Bar = namedtuple('Bar', 'time open high low close')
 
 class HA:
