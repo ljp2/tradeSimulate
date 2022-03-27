@@ -6,7 +6,7 @@ from matplotlib.animation import FuncAnimation
 from barscandles import Bars, HACandles
 
 def createCandlePlot(q):
-    bars = q.get()['data']
+    bars = q.get()
     habars = HACandles()
 
     width = (bars[1].time - bars[0].time) * 0.8
@@ -22,12 +22,17 @@ def createCandlePlot(q):
     ax.set_xlim(left=left, right=right)
     ax.set_ylim(bottom=bars.min()-5, top=bars.max()+5)
 
-    i = 0
-    while i < 390:
+    close_price = plt.text( 
+        1.0, 0.95, " ",
+        ha='right', va='top',
+        transform=ax.transAxes
+    )
+
+    while True:
         if not q.empty():
-            q.get()
-            bar = bars[i]
-            i += 1
+            bar = q.get()
+            # bar = bars[i]
+            # i += 1
             t, o, h, l, c, v, w = bar
             if c >= o:
                 b1 = ax.bar(t, c-o, width, bottom=o, color=col1)
@@ -49,6 +54,13 @@ def createCandlePlot(q):
                 b5 = bx.bar(t, h-o, width2, bottom=o, color=col2)
                 b6 = bx.bar(t, l-c, width2, bottom=c, color=col2)
                 
+            close_price.remove()
+            close_price = plt.text( 
+               1.0, 0.95, "{:10.2f}".format(bar.close),
+               ha='right', va='top',
+               transform=ax.transAxes
+            )
+            
         plt.pause(0.05)
         
 

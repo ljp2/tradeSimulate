@@ -28,13 +28,13 @@ class Bars:
             self.current_bar_index = 0
         else:
             self.current_bar_index += 1
-        return self.bars[self.current_bar_index]
+        return self[self.current_bar_index]
 
     def previous_bar(self):
         return self.bars[ self.current_bar_index - 1]
 
     def current_bar(self):
-        return self.bars[ self.current_bar_index]
+        return self[ self.current_bar_index]
 
     def get_all_bars(self):
         return self.bars
