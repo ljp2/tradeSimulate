@@ -1,6 +1,7 @@
 from tkinter import *
 from tkinter import ttk
 from multiprocessing import Process, Queue
+import os
 
 from barscandles import Bars
 from plots import createCandlePlot
@@ -28,6 +29,8 @@ class GUI(Tk):
         self.unreal_profit_loss = StringVar(value = 0)
         self.day_profit_loss = StringVar(value = 0)
 
+    def update_value_vars():
+        pass
             
     def __init__(self, bars_queue):
         super().__init__()
@@ -41,8 +44,14 @@ class GUI(Tk):
 
         filenameframe = ttk.Frame(mainframe)
         filenameframe.grid(row=0,column=0)
-        select_file_entry = ttk.Entry(filenameframe, width=20, textvariable=self.filename)
+
+        if os.name == 'nt':
+            values=os.listdir('c:/trade/Data/bars1/')
+        else:
+            values=os.listdir('/Users/ljp2/trade/Data/bars1/')
+        select_file_entry = ttk.Combobox(filenameframe, width=20, textvariable=self.filename, values=values)
         select_file_entry.grid(row=0, column=0, padx=5, pady=5)
+
         self.select_file_btn = ttk.Button(filenameframe, text='Open File', command=self.openFile)
         self.select_file_btn.grid(row=0, column=1, padx=5, pady=5)
         next_bar_btn = ttk.Button(filenameframe, text='Next Bar',  command=self.nextBar)
@@ -79,29 +88,35 @@ class GUI(Tk):
 
     def buy(self):
         pos = int(self.position.get())
-        avgprice = float(self.avgprice.get())
-        close_price = self.bars.current_bar().close
         newpos = pos + 100
-        self.position_value += close_price * 100
-        if newpos == 0:
-            newavgprice = 0
-        else:
-            newavgprice = self.position_value / abs(newpos)
         self.position.set(newpos)
-        self.avgprice.set(newavgprice)
+
+        # avgprice = float(self.avgprice.get())
+        # close_price = self.bars.current_bar().close
+        # newpos = pos + 100
+        # self.position_value += close_price * 100
+        # if newpos == 0:
+        #     newavgprice = 0
+        # else:
+        #     newavgprice = self.position_value / abs(newpos)
+        # self.position.set(newpos)
+        # self.avgprice.set(newavgprice)
 
     def sell(self):
         pos = int(self.position.get())
-        avgprice = float(self.avgprice.get())
-        close_price = self.bars.current_bar().close
         newpos = pos - 100
-        self.position_value -= close_price * 100
-        if newpos == 0:
-            newavgprice = 0
-        else:
-            newavgprice = self.position_value / abs(newpos)
         self.position.set(newpos)
-        self.avgprice.set(newavgprice)
+        # pos = int(self.position.get())
+        # avgprice = float(self.avgprice.get())
+        # close_price = self.bars.current_bar().close
+        # newpos = pos - 100
+        # self.position_value -= close_price * 100
+        # if newpos == 0:
+        #     newavgprice = 0
+        # else:
+        #     newavgprice = self.position_value / abs(newpos)
+        # self.position.set(newpos)
+        # self.avgprice.set(newavgprice)
 
 def Gui(bars_queue:Queue):
     gui = GUI(bars_queue)
