@@ -29,7 +29,10 @@ class GUI(Tk):
     def init_vars(self):
         self.filename = StringVar(value='20220202.csv')
         self.position = 0
-        self.position_value = 0
+        self.position_value = 0.0
+        self.unrealized_profit = 0.0
+        self.day_profit = 0.0
+        self.base_value = 0
 
     def update_value_vars():
         pass
@@ -65,16 +68,16 @@ class GUI(Tk):
         positionframe = ttk.Frame(mainframe)
         positionframe.grid(row=1, column=0, padx=10, pady=10)
         
-        self.position_lbl = Label(positionframe, text="Position {:3d}".format(0))
+        self.position_lbl = Label(positionframe, text="Position {:3d}".format(self.position))
         self.position_lbl.grid(row=0, column=0, padx=5, pady=5)
 
-        self.position_value_lbl = Label(positionframe, text="Position Value {:9.2f}".format(0))
+        self.position_value_lbl = Label(positionframe, text="Position Value {:9.2f}".format(self.position_value))
         self.position_value_lbl.grid(row=0, column=2, padx=10, pady=10)
 
-        self.unreal_pl_lbl = ttk.Label(positionframe, text="UnRealized P/L{:9.2f}".format(0))
+        self.unreal_pl_lbl = ttk.Label(positionframe, text="UnRealized P/L{:9.2f}".format(self.unrealized_profit))
         self.unreal_pl_lbl.grid(row=0, column=4, padx=10, pady=10)
 
-        self.day_pl_lbl = ttk.Label(positionframe, text="Day P/L {:9.2f}".format(0))
+        self.day_pl_lbl = ttk.Label(positionframe, text="Day P/L {:9.2f}".format(self.day_profit))
         self.day_pl_lbl.grid(row=0, column=6, padx=10, pady=10)
 
         self.price_lbl = ttk.Label(positionframe, text="Price -------")
