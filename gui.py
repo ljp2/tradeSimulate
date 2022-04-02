@@ -19,20 +19,17 @@ class GUI(Tk):
 
         self.next_bar_btn.focus()
 
-    def nextBar(self):
-        bar = self.bars.get_next_bar()
-        self.bars_queue.put(bar)
-        close_price = "Price {:.2f}".format(bar.close) 
-        self.price_lbl['text'] = close_price
-        self.setPositionValues()
 
     def init_vars(self):
         self.filename = StringVar(value='20220202.csv')
         self.position = 0
+
+        self.position_cost = 0.0
         self.position_value = 0.0
-        self.unrealized_profit = 0.0
         self.day_profit = 0.0
+        
         self.base_value = 0
+
 
     def update_value_vars():
         pass
@@ -71,10 +68,13 @@ class GUI(Tk):
         self.position_lbl = Label(positionframe, text="Position {:3d}".format(self.position))
         self.position_lbl.grid(row=0, column=0, padx=5, pady=5)
 
+        self.position_cost_lbl = Label(positionframe, text="Position Cost {:9.2f}".format(self.position_cost))
+        self.position_cost_lbl.grid(row=0, column=1, padx=10, pady=10)
+
         self.position_value_lbl = Label(positionframe, text="Position Value {:9.2f}".format(self.position_value))
         self.position_value_lbl.grid(row=0, column=2, padx=10, pady=10)
 
-        self.unreal_pl_lbl = ttk.Label(positionframe, text="UnRealized P/L{:9.2f}".format(self.unrealized_profit))
+        self.unreal_pl_lbl = ttk.Label(positionframe, text="UnRealized P/L{:9.2f}".format(0))
         self.unreal_pl_lbl.grid(row=0, column=4, padx=10, pady=10)
 
         self.day_pl_lbl = ttk.Label(positionframe, text="Day P/L {:9.2f}".format(self.day_profit))
@@ -102,46 +102,46 @@ class GUI(Tk):
 
     def setPositionValues(self):
         pos = self.position
-        self.position_lbl['text'] = "Position {:3d}".format(pos)
         close_price = self.bars.current_bar().close
-        value = pos * close_price
-        self.position_value_lbl['text'] = "Position Value {:9.2f}".format(value)
+        position_value = pos * close_price
+        unreal_pl = position_value - self.position_cost
+
+        self.price_lbl['text'] = close_price
+        self.position_lbl['text'] = "Position {:3d}".format(pos)
+        self.position_value_lbl['text'] = "Position Value {:9.2f}".format(position_value)
+        self.position_cost_lbl['text'] = "Position Cost {:9.2f}".format(self.position_cost)
+        self.unreal_pl_lbl['text'] = text="UnRealized P/L{:9.2f}".format(unreal_pl)
         self.setPositionColor()
 
+
+    def nextBar(self):
+        bar = self.bars.get_next_bar()
+        self.bars_queue.put(bar)
+        self.setPositionValues()
+
+
     def buy(self):
-        self.position +=  100
+        quantity = 100
+        close_price = self.bars.current_bar().close
+        self.position +=  quantity
+        self.position_cost += quantity * close_price
+
         self.setPositionValues()
 
         self.next_bar_btn.focus()
 
-        # posvalue = float(self.posvalue.get())
-        # close_price = self.bars.current_bar().close
-        # newpos = pos + 100
-        # self.position_value += close_price * 100
-        # if newpos == 0:
-        #     newposvalue = 0
-        # else:
-        #     newposvalue = self.position_value / abs(newpos)
-        # self.position.set(newpos)
-        # self.posvalue.set(newposvalue)
 
     def sell(self):
-        self.position -=  100
+        quantity = 100
+        close_price = self.bars.current_bar().close
+        self.position -=  quantity
+        self.position_cost -= quantity * close_price
+
         self.setPositionValues()
 
         self.next_bar_btn.focus()
 
-        # pos = int(self.position.get())
-        # posvalue = float(self.posvalue.get())
-        # close_price = self.bars.current_bar().close
-        # newpos = pos - 100
-        # self.position_value -= close_price * 100
-        # if newpos == 0:
-        #     newposvalue = 0
-        # else:
-        #     newposvalue = self.position_value / abs(newpos)
-        # self.position.set(newpos)
-        # self.posvalue.set(newposvalue)
+
 
 def Gui(bars_queue:Queue):
     gui = GUI(bars_queue)
