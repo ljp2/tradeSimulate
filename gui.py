@@ -74,10 +74,10 @@ class GUI(Tk):
         self.position_value_lbl = Label(positionframe, text="Position Value {:9.2f}".format(self.position_value))
         self.position_value_lbl.grid(row=0, column=2, padx=10, pady=10)
 
-        self.unreal_pl_lbl = ttk.Label(positionframe, text="UnRealized P/L{:9.2f}".format(0))
+        self.unreal_pl_lbl = Label(positionframe, text="UnRealized P/L{:9.2f}".format(0))
         self.unreal_pl_lbl.grid(row=0, column=4, padx=10, pady=10)
 
-        self.day_pl_lbl = ttk.Label(positionframe, text="Day P/L {:9.2f}".format(self.day_profit))
+        self.day_pl_lbl = Label(positionframe, text="Day P/L {:9.2f}".format(self.day_profit))
         self.day_pl_lbl.grid(row=0, column=6, padx=10, pady=10)
 
         self.price_lbl = ttk.Label(positionframe, text="Price -------")
@@ -100,17 +100,25 @@ class GUI(Tk):
             self.position_lbl['fg'] = 'black'
             self.position_value_lbl['fg'] = 'black'
 
+        if self.unreal_pl < 0:
+            self.unreal_pl_lbl['fg'] = 'red'
+        elif self.unreal_pl > 0:
+            self.unreal_pl_lbl['fg'] = 'green'
+        else:
+            self.unreal_pl_lbl['fg'] = 'black'
+
+
     def setPositionValues(self):
         pos = self.position
         close_price = self.bars.current_bar().close
         position_value = pos * close_price
-        unreal_pl = position_value - self.position_cost
+        self.unreal_pl = position_value - self.position_cost
 
         self.price_lbl['text'] = close_price
         self.position_lbl['text'] = "Position {:3d}".format(pos)
         self.position_value_lbl['text'] = "Position Value {:9.2f}".format(position_value)
         self.position_cost_lbl['text'] = "Position Cost {:9.2f}".format(self.position_cost)
-        self.unreal_pl_lbl['text'] = text="UnRealized P/L{:9.2f}".format(unreal_pl)
+        self.unreal_pl_lbl['text'] = text="UnRealized P/L{:9.2f}".format(self.unreal_pl)
         self.setPositionColor()
 
 
