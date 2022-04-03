@@ -23,17 +23,11 @@ class GUI(Tk):
     def init_vars(self):
         self.filename = StringVar(value='20220202.csv')
         self.position = 0
-
         self.position_cost = 0.0
         self.position_value = 0.0
-        self.day_profit = 0.0
-        
-        self.base_value = 0
+        self.unreal_pl = 0.0
+        self.day_pl = 0.0
 
-
-    def update_value_vars():
-        pass
-            
     def __init__(self, bars_queue):
         super().__init__()
         self.init_vars()
@@ -77,10 +71,10 @@ class GUI(Tk):
         self.unreal_pl_lbl = Label(positionframe, text="UnRealized P/L{:9.2f}".format(0))
         self.unreal_pl_lbl.grid(row=0, column=4, padx=10, pady=10)
 
-        self.day_pl_lbl = Label(positionframe, text="Day P/L {:9.2f}".format(self.day_profit))
+        self.day_pl_lbl = Label(positionframe, text="Day P/L {:9.2f}".format(self.day_pl))
         self.day_pl_lbl.grid(row=0, column=6, padx=10, pady=10)
 
-        self.price_lbl = ttk.Label(positionframe, text="Price -------")
+        self.price_lbl = Label(positionframe, text="Price -------")
         self.price_lbl.grid(row=1, column=0, padx=5, pady=5)
         buy_btn = ttk.Button(positionframe, text="Buy", command=self.buy)
         buy_btn.grid(row=1, column=1)        
@@ -92,12 +86,15 @@ class GUI(Tk):
         pos = self.position
         if pos < 0:
             self.position_lbl['fg'] = 'red'
+            self.position_cost_lbl['fg'] = 'red'
             self.position_value_lbl['fg'] = 'red'
         elif pos > 0:
             self.position_lbl['fg'] = 'green'
+            self.position_cost_lbl['fg'] = 'green'
             self.position_value_lbl['fg'] = 'green'
         else:
             self.position_lbl['fg'] = 'black'
+            self.position_cost_lbl['fg'] = 'black'
             self.position_value_lbl['fg'] = 'black'
 
         if self.unreal_pl < 0:
@@ -107,46 +104,72 @@ class GUI(Tk):
         else:
             self.unreal_pl_lbl['fg'] = 'black'
 
+        if self.day_pl < 0:
+            self.day_pl_lbl['fg'] = 'red'
+        elif self.day_pl > 0:
+            self.day_pl_lbl['fg'] = 'green'
+        else:
+            self.day_pl_lbl['fg'] = 'black'
+
+
 
     def setPositionValues(self):
-        pos = self.position
-        close_price = self.bars.current_bar().close
-        position_value = pos * close_price
-        self.unreal_pl = position_value - self.position_cost
-
-        self.price_lbl['text'] = close_price
-        self.position_lbl['text'] = "Position {:3d}".format(pos)
-        self.position_value_lbl['text'] = "Position Value {:9.2f}".format(position_value)
+        self.position_value = self.position * self.close_price
+        self.price_lbl['text'] = self.close_price
+        self.position_lbl['text'] = "Position {:3d}".format(self.position)
+        self.position_value_lbl['text'] = "Position Value {:9.2f}".format(self.position_value)
         self.position_cost_lbl['text'] = "Position Cost {:9.2f}".format(self.position_cost)
-        self.unreal_pl_lbl['text'] = text="UnRealized P/L{:9.2f}".format(self.unreal_pl)
+        self.unreal_pl_lbl['text'] = "UnRealized P/L{:9.2f}".format(self.unreal_pl)
+        self.day_pl_lbl['text'] = "Day P/L {:9.2f}".format(self.day_pl)
         self.setPositionColor()
 
 
     def nextBar(self):
         bar = self.bars.get_next_bar()
+        self.close_price = self.bars.current_bar().close
+        self.position_value = self.position * self.close_price
+        self.unreal_pl = self.position_value - self.position_cost
         self.bars_queue.put(bar)
         self.setPositionValues()
 
 
     def buy(self):
         quantity = 100
-        close_price = self.bars.current_bar().close
-        self.position +=  quantity
-        self.position_cost += quantity * close_price
+        if self.position < 0:
+            day_pl_increment = (self.position_cost - self.close_price) / self.position * quantity
+            self.day_pl += day_pl_increment
+
+        self.position += quantity
+        if self.position != 0:
+            self.position_value = self.position * self.close_price
+            self.position_cost += quantity * self.close_price
+            self.unreal_pl = self.position_value - self.position_cost 
+        else:
+            self.position_value = 0
+            self.position_cost = 0
+            self.unreal_pl = 0
 
         self.setPositionValues()
-
         self.next_bar_btn.focus()
 
 
     def sell(self):
         quantity = 100
-        close_price = self.bars.current_bar().close
-        self.position -=  quantity
-        self.position_cost -= quantity * close_price
+        if self.position > 0:
+            day_pl_increment = (self.close_price - self.position_cost / self.position) * quantity
+            self.day_pl += day_pl_increment
+
+        self.position -= quantity
+        if self.position != 0:
+            self.position_value = self.position * self.close_price
+            self.position_cost -= quantity * self.close_price
+            self.unreal_pl = self.position_value - self.position_cost 
+        else:
+            self.position_value = 0
+            self.position_cost = 0
+            self.unreal_pl = 0
 
         self.setPositionValues()
-
         self.next_bar_btn.focus()
 
 
