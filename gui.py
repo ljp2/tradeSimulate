@@ -25,6 +25,7 @@ class GUI(Tk):
         self.position = 0
         self.position_cost = 0.0
         self.position_value = 0.0
+    
         self.unreal_pl = 0.0
         self.day_pl = 0.0
 
@@ -113,9 +114,9 @@ class GUI(Tk):
 
 
 
-    def setPositionValues(self):
-        self.position_value = self.position * self.close_price
-        self.price_lbl['text'] = self.close_price
+    def setPositionLabels(self):
+        self.position_value = self.position * self.current_price
+        self.price_lbl['text'] = self.current_price
         self.position_lbl['text'] = "Position {:3d}".format(self.position)
         self.position_value_lbl['text'] = "Position Value {:9.2f}".format(self.position_value)
         self.position_cost_lbl['text'] = "Position Cost {:9.2f}".format(self.position_cost)
@@ -124,52 +125,61 @@ class GUI(Tk):
         self.setPositionColor()
 
 
+    def calculatePositionValues(self):
+        self.position_value = self.position * self.current_price
+        if self.position < 0:
+            self.unreal_pl = abs(self.position_cost) - self.position_value
+        if self.position == 0:
+            self.unreal_pl = 0
+        else:
+            self.unreal_pl = self.position_value = self.position_cost
+
+
     def nextBar(self):
         bar = self.bars.get_next_bar()
-        self.close_price = self.bars.current_bar().close
-        self.position_value = self.position * self.close_price
-        self.unreal_pl = self.position_value - self.position_cost
+        self.current_price = self.bars.current_bar().close
+        self.calculatePositionValues()
+        self.setPositionLabels()
         self.bars_queue.put(bar)
-        self.setPositionValues()
-
-
+        
+        
     def buy(self):
         quantity = 100
         if self.position < 0:
-            day_pl_increment = (self.position_cost - self.close_price) / self.position * quantity
-            self.day_pl += day_pl_increment
-
-        self.position += quantity
-        if self.position != 0:
-            self.position_value = self.position * self.close_price
-            self.position_cost += quantity * self.close_price
-            self.unreal_pl = self.position_value - self.position_cost 
+            value_per_share = self.position_cost/ self.position
+            pl = (abs(value_per_share) - self.current_price) * quantity
+            self.day_pl += pl
+            self.position += quantity
+            self.position_cost = value_per_share * self.position
+        elif self.position == 0:
+            self.position += quantity
+            self.position_cost = self.current_price * self.position
         else:
-            self.position_value = 0
-            self.position_cost = 0
-            self.unreal_pl = 0
+            self.position_cost += quantity * self.current_price
+            self.position += quantity
 
-        self.setPositionValues()
+        self.calculatePositionValues()
+        self.setPositionLabels()
         self.next_bar_btn.focus()
 
 
     def sell(self):
         quantity = 100
-        if self.position > 0:
-            day_pl_increment = (self.close_price - self.position_cost / self.position) * quantity
-            self.day_pl += day_pl_increment
-
-        self.position -= quantity
-        if self.position != 0:
-            self.position_value = self.position * self.close_price
-            self.position_cost -= quantity * self.close_price
-            self.unreal_pl = self.position_value - self.position_cost 
+        if self.position < 0:
+            self.position_cost -= quantity * self.current_price
+            self.position -= quantity            
+        elif self.position == 0:
+            self.position -= quantity
+            self.position_cost = -self.current_price * self.position
         else:
-            self.position_value = 0
-            self.position_cost = 0
-            self.unreal_pl = 0
+            cost_per_share = self.position_cost/ self.position
+            pl = (self.current_price - cost_per_share) * quantity
+            self.day_pl += pl
+            self.position -= quantity
+            self.position_cost = cost_per_share * self.position
 
-        self.setPositionValues()
+        self.calculatePositionValues()
+        self.setPositionLabels()
         self.next_bar_btn.focus()
 
 
