@@ -47,7 +47,8 @@ class GUI(Tk):
             values = os.listdir('c:/trade/Data/bars1/')
         else:
             values = os.listdir('/Users/ljp2/trade/Data/bars1/')
-
+            values.sort(reverse=True)
+            
     # File Frame
         select_file_entry = ttk.Combobox(
             filenameframe, width=20, textvariable=self.filename, values=values)
