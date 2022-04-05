@@ -63,17 +63,17 @@ class GUI(Tk):
         self.position_lbl = Label(positionframe, text="Position {:3d}".format(self.position))
         self.position_lbl.grid(row=0, column=0, padx=5, pady=5)
 
-        self.position_cost_lbl = Label(positionframe, text="Position Cost {:9.2f}".format(self.position_cost))
-        self.position_cost_lbl.grid(row=0, column=1, padx=10, pady=10)
-
-        self.position_value_lbl = Label(positionframe, text="Position Value {:9.2f}".format(self.position_value))
-        self.position_value_lbl.grid(row=0, column=2, padx=10, pady=10)
-
         self.unreal_pl_lbl = Label(positionframe, text="UnRealized P/L{:9.2f}".format(0))
-        self.unreal_pl_lbl.grid(row=0, column=4, padx=10, pady=10)
+        self.unreal_pl_lbl.grid(row=0, column=1, padx=10, pady=10)
 
         self.day_pl_lbl = Label(positionframe, text="Day P/L {:9.2f}".format(self.day_pl))
-        self.day_pl_lbl.grid(row=0, column=6, padx=10, pady=10)
+        self.day_pl_lbl.grid(row=0, column=2, padx=10, pady=10)
+
+        self.position_cost_lbl = Label(positionframe, text="Position Cost {:9.2f}".format(self.position_cost))
+        self.position_cost_lbl.grid(row=0, column=3, padx=10, pady=10)
+
+        self.position_value_lbl = Label(positionframe, text="Position Value {:9.2f}".format(self.position_value))
+        self.position_value_lbl.grid(row=0, column=4, padx=10, pady=10)
 
         self.price_lbl = Label(positionframe, text="Price -------")
         self.price_lbl.grid(row=1, column=0, padx=5, pady=5)
@@ -132,7 +132,7 @@ class GUI(Tk):
         if self.position == 0:
             self.unreal_pl = 0
         else:
-            self.unreal_pl = self.position_value = self.position_cost
+            self.unreal_pl = self.position_value - self.position_cost
 
 
     def nextBar(self):
@@ -170,7 +170,7 @@ class GUI(Tk):
             self.position -= quantity            
         elif self.position == 0:
             self.position -= quantity
-            self.position_cost = -self.current_price * self.position
+            self.position_cost = self.current_price * self.position
         else:
             cost_per_share = self.position_cost/ self.position
             pl = (self.current_price - cost_per_share) * quantity
